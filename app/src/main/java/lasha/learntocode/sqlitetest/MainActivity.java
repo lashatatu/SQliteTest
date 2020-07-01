@@ -3,9 +3,11 @@ package lasha.learntocode.sqlitetest;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -14,6 +16,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,17 +25,31 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        SQLiteDatabase sqLiteDatabase = getBaseContext().openOrCreateDatabase("sqLite-test-1.db", MODE_PRIVATE, null);
-        sqLiteDatabase.execSQL("CREATE TABLE contacts(name TEXT, phone INTEGET, email TEXT);");
-        sqLiteDatabase.execSQL("INSERT INTO contacts VALUES('lasha', 6456789, 'lasha@mail.com');");
-        sqLiteDatabase.execSQL("INSERT INTO contacts VALUES('fred', 12345, 'fred@mail.com');");
+        SQLiteDatabase sqLiteDatabase = getBaseContext().openOrCreateDatabase("sqlite-test-1.db", MODE_PRIVATE, null);
+        String sql = "DROP TABLE IF EXISTS contacts;";
+        Log.d(TAG, "onCreate: sql = " + sql);
+        sqLiteDatabase.execSQL(sql);
+        sql = "CREATE TABLE IF NOT EXISTS contacts(name TEXT, phone INTEGER, email TEXT);";
+        Log.d(TAG, "onCreate: sql is " + sql);
+        sqLiteDatabase.execSQL(sql);
+        sql = "INSERT INTO contacts VALUES('lasha', 6456789, 'lasha@email.com');";
+        Log.d(TAG, "onCreate: sql is " + sql);
+        sqLiteDatabase.execSQL(sql);
+        sql = "INSERT INTO contacts VALUES('Fred', 12345, 'fred@nurk.com');";
+        Log.d(TAG, "onCreate: sql is " + sql);
+        sqLiteDatabase.execSQL(sql);
 
         Cursor query = sqLiteDatabase.rawQuery("SELECT * FROM contacts;", null);
         if (query.moveToFirst()) {
-            String name=query.getString(0);
-            int phone=query.getInt(1);
-            String email=query.getString(2);
+            do {
+                String name = query.getString(0);
+                int phone = query.getInt(1);
+                String email = query.getString(2);
+                Toast.makeText(this, "Name = " + name + " phone = " + phone + " email = " + email, Toast.LENGTH_LONG).show();
+            } while (query.moveToNext());
         }
+        query.close();
+        sqLiteDatabase.close();
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
